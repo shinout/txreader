@@ -1,6 +1,6 @@
 var TxR = require('../txreader');
 var FR  = require('fastareader');
-var fr  = new FR('/home/ngs/data/hg19.fa');
+var fr  = new FR(process.argv[2]);
 
 
 
