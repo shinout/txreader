@@ -1,12 +1,30 @@
 var fs = require("fs");
+var dna = require('dna');
 
-function TxReader(knownGene) {
+/**
+ * constructor
+ **/
+function TxReader(knownGene, options) {
+  options || (options = {});
   this._knownGene = knownGene;
   this._fd = fs.openSync(this._knownGene, "r");
   this._index = null;
+  this._infos = {};
+  this._cacheInfo = !options.noCacheInfo;
   this.load();
 }
 
+
+/**
+ * constructor (static) 
+ **/
+TxReader.load = function(knownGene, options) {
+  return new TxReader(knownGene, options);
+};
+
+/**
+ * load a knownGene file
+ **/
 TxReader.prototype.load = function() {
   var transcripts = fs.readFileSync(this._knownGene).toString().split('\n');
 
@@ -28,15 +46,20 @@ TxReader.prototype.load = function() {
   this._index = ret;
 };
 
+/**
+ * get transcript names
+ **/
 TxReader.prototype.getNames = function() {
   return Object.keys(this._index);
 };
 
+/**
+ * get transcript lines
+ **/
 TxReader.prototype.getLine = function(name) {
   if (!this._index) {
     this.load();
   }
-
 
   var line = this._index[name];
 
@@ -44,11 +67,6 @@ TxReader.prototype.getLine = function(name) {
     throw new Error("invalid name: " + name);
   }
   return line;
-
-  // var pos = line[0];
-  // var len = line[1];
-  // var ret = fs.readSync(this._fd, len, pos, "utf8")[0];
-  // return ret;
 };
 
 
@@ -56,8 +74,41 @@ TxReader.prototype.getLine = function(name) {
  * get information
  **/
 TxReader.prototype.getInfo = function(name) {
+  if (this._infos[name]) return this._infos[name];
   var line = this.getLine(name);
-  return TxReader.parseLine(line);
+  var ret = TxReader.parseLine(line);
+  if (this._cacheInfo) this._infos[name] = ret;
+  return ret;
+};
+
+
+/**
+ * get sequence
+ **/
+TxReader.prototype.getSeq = function(name, fr, options) {
+  var info = (typeof name == 'object') ? name : this.getInfo(name);
+
+  options || (options = {});
+  var startExon = options.startExon || 1;
+  var startBase = options.startBase || 0;
+  var endExon   = options.endExon || info.exons.length;
+  var endBase   = options.endBase || info.exons[endExon].end - info.exons[endExon].start;
+
+  return info.exons.map(function(exon, k) {
+    var K = k+1;
+    if (K < startExon || K > endExon) return '';
+
+    var poslen = dna.getPosLen(exon.start, exon.end);
+    var seq = fr.fetch(info.chrom, poslen[0], poslen[1], info.isMinus);
+
+    if (K == startExon) {
+      seq = seq.slice(startBase);
+    }
+    if (K == endExon) {
+      seq = seq.slice(0, (K != startExon) ? endBase : endBase - startBase);
+    }
+    return seq;
+  }).join('');
 };
 
 
@@ -96,6 +147,9 @@ TxReader.parseLine = function(line) {
     exons = exons.reverse();
   }
   ret.exons = exons;
+  delete ret.exonStarts;
+  delete ret.exonEnds;
+  delete ret.exonCount;
 
   return ret;
 };
