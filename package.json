@@ -11,5 +11,7 @@
   },
   "main" : "./txreader.js",
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "fastareader": ">=0.1.3"
+  }
 }
