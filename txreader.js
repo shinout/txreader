@@ -92,7 +92,7 @@ TxReader.prototype.getSeq = function(name, fr, options) {
   var startExon = options.startExon || 1;
   var startBase = options.startBase || 0;
   var endExon   = options.endExon || info.exons.length;
-  var endBase   = options.endBase || info.exons[endExon].end - info.exons[endExon].start;
+  var endBase   = options.endBase || info.exons[endExon-1].end - info.exons[endExon-1].start;
 
   return info.exons.map(function(exon, k) {
     var K = k+1;
