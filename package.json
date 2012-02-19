@@ -2,7 +2,7 @@
   "author": "SHIN Suzuki <shinout310@gmail.com>",
   "name": "txreader",
   "description": "read transcriptome data",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "url": ""
   },
@@ -12,6 +12,6 @@
   "main" : "./txreader.js",
   "dependencies": {
     "dna": ">=0.1.4",
-    "fastareader": ">=0.1.4"
+    "fastareader": ">=0.1.5"
   }
 }

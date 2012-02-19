@@ -11,6 +11,17 @@ function TxReader(knownGene, options) {
   this._index = null;
   this._infos = {};
   this._cacheInfo = !options.noCacheInfo;
+  if (options.xref) {
+    this._genes = require('fs').readFileSync(options.xref, "utf8").split('\n').filter(function(v) {
+      return v.length
+    })
+    .reduce(function(obj, v) {
+      var data = v.split('\t');
+      obj[data[0]] = data[4];
+      return obj;
+    }, {});
+  }
+
   this.load();
 }
 
@@ -26,7 +37,7 @@ TxReader.load = function(knownGene, options) {
  * load a knownGene file
  **/
 TxReader.prototype.load = function() {
-  var transcripts = fs.readFileSync(this._knownGene).toString().split('\n');
+  var transcripts = fs.readFileSync(this._knownGene, "utf8").split('\n');
 
   var ret = {};
   var pos = 0;
@@ -53,6 +64,11 @@ TxReader.prototype.getNames = function() {
   return Object.keys(this._index);
 };
 
+TxReader.prototype.getGeneName = function(txname) {
+  if (!this._genes) throw new Error('you must give xref file in constructor option to call TxReader#getGeneName()');
+  return this._genes[txname];
+};
+
 /**
  * get transcript lines
  **/
@@ -77,6 +93,7 @@ TxReader.prototype.getInfo = function(name) {
   if (this._infos[name]) return this._infos[name];
   var line = this.getLine(name);
   var ret = TxReader.parseLine(line);
+  if (this._genes) ret.gene = this.getGeneName(name);
   if (this._cacheInfo) this._infos[name] = ret;
   return ret;
 };

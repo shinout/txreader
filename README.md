@@ -14,7 +14,9 @@ installation
 usage
 ------
     var TxReader = require('txreader');
-    var tx = new TxReader('knownGene.txt');
+    var tx = new TxReader('knownGene.txt', {
+      xref: 'kgXref.txt' // gene name info (optional)
+    });
     var info = tx.getInfo('uc001acn.2'); // info object (explains later)
 
 info?
@@ -27,7 +29,7 @@ info?
 
 <tr><th>name</th>
 <td>name of the transcript</td>
-<td></td>uc011msz</tr>
+<td></td>uc011msz.1</tr>
 
 <tr><th>chrom</th>
 <td>chromosome name</td>
@@ -78,4 +80,10 @@ info?
 <tr><th>exons</th>
 <td>list of exons. (Array)</td>
 <td>[{start: xxx, end: xxx}, ...]</td></tr>
+
+<tr><th>gene</th>
+<td>gene name</td>
+<td>ALG13</td></tr>
+
+
 </table>
