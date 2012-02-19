@@ -28,3 +28,9 @@ seq = txr.getSeq(info, fr, {startExon: 1, endExon: 2, startBase : st, endBase: s
 var seq0 = txr.getSeq(info, fr, {startExon: 1, endExon: 1}).slice(st);
 console.assert(seq == seq0 + fr.fetch(info.chrom, info.exons[1].end-st-len+1, st + len, info.isMinus))
 
+var exons = txr.getExons("uc001agz.1");
+exons.forEach(function(eformat) {
+  txr.getTxsByExon(eformat).forEach(function(txname) {
+    console.log(txname, txr.getGeneName(txname));
+  });
+});

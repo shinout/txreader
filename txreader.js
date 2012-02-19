@@ -9,8 +9,10 @@ function TxReader(knownGene, options) {
   this._knownGene = knownGene;
   this._fd = fs.openSync(this._knownGene, "r");
   this._index = null;
+  this._exons = null;
   this._infos = {};
   this._cacheInfo = !options.noCacheInfo;
+
   if (options.xref) {
     this._genes = require('fs').readFileSync(options.xref, "utf8").split('\n').filter(function(v) {
       return v.length
@@ -33,6 +35,29 @@ TxReader.load = function(knownGene, options) {
   return new TxReader(knownGene, options);
 };
 
+// syntax sugar
+TxReader.create = TxReader.load;
+
+/**
+ *
+ **/
+TxReader.prototype.buildExons = function() {
+  if (this._exons) return this;
+  this._exons = {};
+  Object.keys(this._index).forEach(function(txname) {
+    this.getExons(txname).forEach(function(key) {
+      if (!this._exons[key]) this._exons[key] = [];
+      this._exons[key].push(txname);
+    }, this);
+  }, this);
+  return this;
+};
+
+TxReader.prototype.getTxsByExon = function(formattedExon) {
+  this.buildExons();
+  return this._exons[formattedExon];
+};
+
 /**
  * load a knownGene file
  **/
@@ -43,6 +68,7 @@ TxReader.prototype.load = function() {
   var pos = 0;
 
   transcripts.forEach(function(txline) {
+    if (! txline.trim()) return;
     var data = txline.split('\t');
     var key = data[0];
     ret[key] = txline;
@@ -98,6 +124,15 @@ TxReader.prototype.getInfo = function(name) {
   return ret;
 };
 
+/**
+ * get list of formatted exons
+ **/
+TxReader.prototype.getExons = function(name) {
+  var info = this.getInfo(name);
+  return info.exons.map(function(ex) {
+    return dna.getFormat(info.chrom, ex.start, ex.end, info.strand);
+  });
+};
 
 /**
  * get sequence

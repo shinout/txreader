@@ -18,6 +18,8 @@ usage
       xref: 'kgXref.txt' // gene name info (optional)
     });
     var info = tx.getInfo('uc001acn.2'); // info object (explains later)
+    var formattedExons = tx.getExons('uc001acn.2'); // get list of formatted exons (e.g. chr1:2345-6789,+)
+    var transcripts = tx.getTxsByExon(formattedExons[0]); // get list of transcripts which has the given formatted exon
 
 info?
 ------
