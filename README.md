@@ -19,7 +19,10 @@ usage
     });
     var info = tx.getInfo('uc001acn.2'); // info object (explains later)
     var formattedExons = tx.getExons('uc001acn.2'); // get list of formatted exons (e.g. chr1:2345-6789,+)
-    var transcripts = tx.getTxsByExon(formattedExons[0]); // get list of transcripts which has the given formatted exon
+    var transcripts = tx.getTxsByExon(formattedExons[0]); // get hash of transcripts which has the given formatted exon
+    Object.keys(transcripts).forEach(function(txname) {
+      console.log(txname, transcripts[txname]); // transcript name, the exon number of the given exon in the transcript
+    });
 
 info?
 ------

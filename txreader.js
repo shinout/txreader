@@ -39,22 +39,10 @@ TxReader.load = function(knownGene, options) {
 TxReader.create = TxReader.load;
 
 /**
- *
+ * get hash ({txname => exon number}) of the given formatted exon
  **/
-TxReader.prototype.buildExons = function() {
-  if (this._exons) return this;
-  this._exons = {};
-  Object.keys(this._index).forEach(function(txname) {
-    this.getExons(txname).forEach(function(key) {
-      if (!this._exons[key]) this._exons[key] = [];
-      this._exons[key].push(txname);
-    }, this);
-  }, this);
-  return this;
-};
-
 TxReader.prototype.getTxsByExon = function(formattedExon) {
-  this.buildExons();
+  this._buildExons();
   return this._exons[formattedExon];
 };
 
@@ -163,6 +151,22 @@ TxReader.prototype.getSeq = function(name, fr, options) {
   }).join('');
 };
 
+
+/**
+ * build exon info
+ **/
+TxReader.prototype._buildExons = function() {
+  if (this._exons) return this;
+  this._exons = {};
+  Object.keys(this._index).forEach(function(txname) {
+    this.getExons(txname).forEach(function(key, k) {
+      var N = k+1;
+      if (!this._exons[key]) this._exons[key] = {};
+      this._exons[key][txname] = N;
+    }, this);
+  }, this);
+  return this;
+};
 
 
 /**

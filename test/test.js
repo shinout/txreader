@@ -30,7 +30,8 @@ console.assert(seq == seq0 + fr.fetch(info.chrom, info.exons[1].end-st-len+1, st
 
 var exons = txr.getExons("uc001agz.1");
 exons.forEach(function(eformat) {
-  txr.getTxsByExon(eformat).forEach(function(txname) {
-    console.log(txname, txr.getGeneName(txname));
+  var txs = txr.getTxsByExon(eformat);
+  Object.keys(txs).forEach(function(txname) {
+    console.log(txname, txs[txname], txr.getGeneName(txname));
   });
 });
