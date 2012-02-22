@@ -23,6 +23,8 @@ usage
     Object.keys(transcripts).forEach(function(txname) {
       console.log(txname, transcripts[txname]); // transcript name, the exon number of the given exon in the transcript
     });
+    var BCRs = tx.getTxsByGene('BCR'); // get list of transcripts whose gene name is 'BCR' ( this is NOT hash, but list)
+    var NMs  = tx.getTxsByRefSeqId('NM_033487'); // get list of transcripts whose refseq id is 'NM_033487' ( this is NOT hash, but list)
 
 info?
 ------
@@ -64,20 +66,6 @@ info?
 <td>coding region end position (0-based coordinate system)</td>
 <td>12346880</td></tr>
 
-<!--
-<tr><th>exonCount</th>
-<td>the number of exons</td>
-<td>5</td></tr>
-
-<tr><th>exonStarts</th>
-<td>exon start positions (0-based) (Array)</td>
-<td>[1234, 2345]</td></tr>
-
-<tr><th>exonEnds</th>
-<td>exon end positions (0-based) (Array)</td>
-<td>[1245, 3456]</td></tr>
--->
-
 <tr><th>proteinID</th>
 <td>protein ID</td>
 <td>B7ZGX9</td></tr>
@@ -89,6 +77,11 @@ info?
 <tr><th>gene</th>
 <td>gene name</td>
 <td>ALG13</td></tr>
+
+<tr><th>refseqId</th>
+<td>refseq ID</td>
+<td>NM_033487</td></tr>
+
 
 
 </table>
