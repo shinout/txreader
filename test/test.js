@@ -38,4 +38,6 @@ exons.forEach(function(eformat) {
 var txlist = txr.getTxsByGene("LCP1");
 console.log(txlist);
 console.assert(txlist.indexOf('uc001vaz.3') >= 0);
-
+var nmlist = txr.getTxsByRefSeqId("NM_033487");
+console.log(nmlist);
+console.assert(nmlist.indexOf('uc001agz.1') >= 0);

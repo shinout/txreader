@@ -14,8 +14,9 @@ function TxReader(knownGene, options) {
   this._cacheInfo = !options.noCacheInfo;
 
   if (options.xref) {
-    this._genetxs = {}; // key gene, value tx list
-    this._txgenes = {}; // key tx, value gene
+    this._genes   = {}; // key gene, value tx list
+    this._refseqIds = {}; // key refseqId, value tx list
+    this._txextra = {}; // key tx, value [gene
 
     require('fs').readFileSync(options.xref, "utf8").split('\n').filter(function(v) {
       return v.length
@@ -23,12 +24,23 @@ function TxReader(knownGene, options) {
     .forEach(function(v) {
       var data = v.split('\t');
       var txname = data[0];
+      var refseqId = data[1];
       var gene = data[4];
-      if (!this._genetxs[gene]) {
-        this._genetxs[gene] = [];
+      if (gene) {
+        if (!this._genes[gene]) {
+          this._genes[gene] = [];
+        }
+        this._genes[gene].push(txname);
       }
-      this._genetxs[gene].push(txname);
-      this._txgenes[txname] = gene;
+
+      if (refseqId) {
+        if (!this._refseqIds[refseqId]) {
+          this._refseqIds[refseqId] = [];
+        }
+        this._refseqIds[refseqId].push(txname);
+      }
+
+      this._txextra[txname] = [gene, refseqId];
     }, this);
   }
 
@@ -58,8 +70,17 @@ TxReader.prototype.getTxsByExon = function(formattedExon) {
  * get list of the given gene
  **/
 TxReader.prototype.getTxsByGene = function(geneName) {
-  if (!this._genetxs) throw new Error('you must give xref file in constructor option to call TxReader#getGeneName()');
-  return this._genetxs[geneName];
+  if (!this._genes) throw new Error('you must give xref file in constructor option to call TxReader#getTxsByGene()');
+  return this._genes[geneName];
+};
+
+
+/**
+ * get list of the given refseq id
+ **/
+TxReader.prototype.getTxsByRefSeqId = function(refseqId) {
+  if (!this._refseqIds) throw new Error('you must give xref file in constructor option to call TxReader#getTxsByRefSeqId()');
+  return this._refseqIds[refseqId];
 };
 
 
@@ -96,8 +117,13 @@ TxReader.prototype.getNames = function() {
 };
 
 TxReader.prototype.getGeneName = function(txname) {
-  if (!this._txgenes) throw new Error('you must give xref file in constructor option to call TxReader#getGeneName()');
-  return this._txgenes[txname];
+  if (!this._txextra) throw new Error('you must give xref file in constructor option to call TxReader#getGeneName()');
+  return (this._txextra[txname]) ? this._txextra[txname][0] : null;
+};
+
+TxReader.prototype.getRefSeqId = function(txname) {
+  if (!this._txextra) throw new Error('you must give xref file in constructor option to call TxReader#getGeneName()');
+  return (this._txextra[txname]) ? this._txextra[txname][1] : null;
 };
 
 /**
@@ -124,7 +150,10 @@ TxReader.prototype.getInfo = function(name) {
   if (this._infos[name]) return this._infos[name];
   var line = this.getLine(name);
   var ret = TxReader.parseLine(line);
-  if (this._txgenes) ret.gene = this.getGeneName(name);
+  if (this._txextra) {
+    ret.gene   = this.getGeneName(name);
+    ret.refseqId = this.getRefSeqId(name);
+  }
   if (this._cacheInfo) this._infos[name] = ret;
   return ret;
 };
