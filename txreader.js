@@ -14,14 +14,22 @@ function TxReader(knownGene, options) {
   this._cacheInfo = !options.noCacheInfo;
 
   if (options.xref) {
-    this._genes = require('fs').readFileSync(options.xref, "utf8").split('\n').filter(function(v) {
+    this._genetxs = {}; // key gene, value tx list
+    this._txgenes = {}; // key tx, value gene
+
+    require('fs').readFileSync(options.xref, "utf8").split('\n').filter(function(v) {
       return v.length
     })
-    .reduce(function(obj, v) {
+    .forEach(function(v) {
       var data = v.split('\t');
-      obj[data[0]] = data[4];
-      return obj;
-    }, {});
+      var txname = data[0];
+      var gene = data[4];
+      if (!this._genetxs[gene]) {
+        this._genetxs[gene] = [];
+      }
+      this._genetxs[gene].push(txname);
+      this._txgenes[txname] = gene;
+    }, this);
   }
 
   this.load();
@@ -45,6 +53,15 @@ TxReader.prototype.getTxsByExon = function(formattedExon) {
   this._buildExons();
   return this._exons[formattedExon];
 };
+
+/**
+ * get list of the given gene
+ **/
+TxReader.prototype.getTxsByGene = function(geneName) {
+  if (!this._genetxs) throw new Error('you must give xref file in constructor option to call TxReader#getGeneName()');
+  return this._genetxs[geneName];
+};
+
 
 /**
  * load a knownGene file
@@ -79,8 +96,8 @@ TxReader.prototype.getNames = function() {
 };
 
 TxReader.prototype.getGeneName = function(txname) {
-  if (!this._genes) throw new Error('you must give xref file in constructor option to call TxReader#getGeneName()');
-  return this._genes[txname];
+  if (!this._txgenes) throw new Error('you must give xref file in constructor option to call TxReader#getGeneName()');
+  return this._txgenes[txname];
 };
 
 /**
@@ -107,7 +124,7 @@ TxReader.prototype.getInfo = function(name) {
   if (this._infos[name]) return this._infos[name];
   var line = this.getLine(name);
   var ret = TxReader.parseLine(line);
-  if (this._genes) ret.gene = this.getGeneName(name);
+  if (this._txgenes) ret.gene = this.getGeneName(name);
   if (this._cacheInfo) this._infos[name] = ret;
   return ret;
 };

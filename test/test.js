@@ -35,3 +35,7 @@ exons.forEach(function(eformat) {
     console.log(txname, txs[txname], txr.getGeneName(txname));
   });
 });
+var txlist = txr.getTxsByGene("LCP1");
+console.log(txlist);
+console.assert(txlist.indexOf('uc001vaz.3') >= 0);
+
