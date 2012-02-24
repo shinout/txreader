@@ -240,7 +240,7 @@ TxReader.parseLine = function(line) {
 
   var exons = ret.exonStarts.map(function(exstart, k) {
     var exend = ret.exonEnds[k];
-    return { start: Number(exstart), end: Number(exend) };
+    return { chr: chrom, start: Number(exstart), end: Number(exend), strand: strand };
   });
 
   ret.isMinus = (ret.strand == '-');
